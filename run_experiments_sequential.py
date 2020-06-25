@@ -7,12 +7,15 @@ import pickle
 import numpy as np
 import copy
 
-from nas_algorithms import run_nas_algorithm
-from data import Data
 from params import *
 
 
 def run_experiments(args, save_dir):
+
+    os.environ['search_space'] = args.search_space
+
+    from nas_algorithms import run_nas_algorithm
+    from data import Data
 
     trials = args.trials
     out_file = args.output_filename
@@ -25,9 +28,8 @@ def run_experiments(args, save_dir):
     # set up search space
     mp = copy.deepcopy(metann_params)
     ss = mp.pop('search_space')
-    mf = mp.pop('mf')
     dataset = mp.pop('dataset')
-    search_space = Data(ss, mf=mf, dataset=dataset)
+    search_space = Data(ss, dataset=dataset)
 
     for i in range(trials):
         results = []
@@ -70,10 +72,13 @@ def main(args):
 
     # make save directory
     save_dir = args.save_dir
-    if not save_dir:
-        save_dir = args.algo_params + '/'
     if not os.path.exists(save_dir):
         os.mkdir(save_dir)
+
+    algo_params = args.algo_params
+    save_path = save_dir + '/' + algo_params + '/'
+    if not os.path.exists(save_path):
+        os.mkdir(save_path)
 
     # set up logging
     log_format = '%(asctime)s %(message)s'
@@ -84,7 +89,7 @@ def main(args):
     logging.getLogger().addHandler(fh)
     logging.info(args)
 
-    run_experiments(args, save_dir)
+    run_experiments(args, save_path)
     
 
 if __name__ == "__main__":
@@ -92,9 +97,9 @@ if __name__ == "__main__":
     parser.add_argument('--trials', type=int, default=500, help='Number of trials')
     parser.add_argument('--search_space', type=str, default='nasbench', \
         help='nasbench or darts')
-    parser.add_argument('--algo_params', type=str, default='run_all', help='which parameters to use')
+    parser.add_argument('--algo_params', type=str, default='main_experiments', help='which parameters to use')
     parser.add_argument('--output_filename', type=str, default='round', help='name of output files')
-    parser.add_argument('--save_dir', type=str, default=None, help='name of save directory')
+    parser.add_argument('--save_dir', type=str, default='results_output', help='name of save directory')
     parser.add_argument('--save_specs', type=bool, default=False, help='save the architecture specs')    
 
     args = parser.parse_args()

@@ -8,14 +8,14 @@ sys.path.append(os.path.expanduser('~/darts/cnn'))
 from train_class import Train
 
 OPS = ['none',
-        'max_pool_3x3',
-        'avg_pool_3x3',
-        'skip_connect',
-        'sep_conv_3x3',
-        'sep_conv_5x5',
-        'dil_conv_3x3',
-        'dil_conv_5x5'
-        ]
+       'max_pool_3x3',
+       'avg_pool_3x3',
+       'skip_connect',
+       'sep_conv_3x3',
+       'sep_conv_5x5',
+       'dil_conv_3x3',
+       'dil_conv_5x5'
+       ]
 NUM_VERTICES = 4
 INPUT_1 = 'c_k-2'
 INPUT_2 = 'c_k-1'
@@ -89,47 +89,6 @@ class Arch:
                     mutation[cell][pair][num] = choice
                       
         return mutation
-
-    def get_neighborhood(self, nbhd_type='full', shuffle=True):
-        op_nbhd = []
-        edge_nbhd = []
-
-        for i, cell in enumerate(self.arch):
-            for j, pair in enumerate(cell):
-
-                # mutate the op
-                available = [op for op in range(len(OPS)) if op != pair[1]]
-                for op in available:
-                    new_arch = self.get_arch_list()
-                    new_arch[i][j][1] = op
-                    op_nbhd.append({'spec': new_arch})
-
-                # mutate the edge
-                other = j + 1 - 2 * (j % 2)
-                available = [edge for edge in range(j//2+2) \
-                             if edge not in [cell[other][0], pair[0]]] 
-
-                for edge in available:
-                    new_arch = self.get_arch_list()
-                    new_arch[i][j][0] = edge
-                    edge_nbhd.append({'spec': new_arch})
-
-        if shuffle:
-            random.shuffle(edge_nbhd)
-            random.shuffle(op_nbhd)
-
-        # 112 in edge nbhd, 24 in op nbhd
-        # alternate one edge nbr per 4 op nbrs
-        nbrs = []
-        op_idx = 0
-        for i in range(len(edge_nbhd)):
-            nbrs.append(edge_nbhd[i])
-            for j in range(4):
-                nbrs.append(op_nbhd[op_idx])
-                op_idx += 1
-        nbrs = [*nbrs, *op_nbhd[op_idx:]]
-
-        return nbrs
 
     def get_paths(self):
         """ return all paths from input to output """
@@ -218,31 +177,50 @@ class Arch:
             path_encoding[index] = 1
         return path_encoding
 
-
-    def encode_freq_paths(self, cutoff=100, filepath='~/naszilla/darts/counts.npy'):
-        # natural cutoffs 32, 288, 2336
-        path_indices, _ = self.get_path_indices(long_paths=True)
-        counts = np.load(os.path.expanduser(filepath))
-        sorted_indices = np.flip(np.argsort(counts))
-
-        num_ops = len(OPS)
-        max_paths = sum([num_ops ** i for i in range(NUM_VERTICES + 1)])    
-        cutoff = min(4 * max_paths, cutoff)
-        encoding = np.zeros(cutoff)
-
-        for i, index in enumerate(sorted_indices[:cutoff]):
-            if index in path_indices:
-                encoding[i] = 1
-
-        return encoding
-
-
     def path_distance(self, other):
         # compute the distance between two architectures
         # by comparing their path encodings
         return np.sum(np.array(self.encode_paths() != np.array(other.encode_paths())))
 
+    def get_neighborhood(self, nbhd_type='full', shuffle=True):
+        op_nbhd = []
+        edge_nbhd = []
 
+        for i, cell in enumerate(self.arch):
+            for j, pair in enumerate(cell):
 
+                # mutate the op
+                available = [op for op in range(len(OPS)) if op != pair[1]]
+                for op in available:
+                    new_arch = self.get_arch_list()
+                    new_arch[i][j][1] = op
+                    op_nbhd.append({'spec': new_arch})
+
+                # mutate the edge
+                other = j + 1 - 2 * (j % 2)
+                available = [edge for edge in range(j//2+2) \
+                             if edge not in [cell[other][0], pair[0]]] 
+
+                for edge in available:
+                    new_arch = self.get_arch_list()
+                    new_arch[i][j][0] = edge
+                    edge_nbhd.append({'spec': new_arch})
+
+        if shuffle:
+            random.shuffle(edge_nbhd)
+            random.shuffle(op_nbhd)
+
+        # 112 in edge nbhd, 24 in op nbhd
+        # alternate one edge nbr per 4 op nbrs
+        nbrs = []
+        op_idx = 0
+        for i in range(len(edge_nbhd)):
+            nbrs.append(edge_nbhd[i])
+            for j in range(4):
+                nbrs.append(op_nbhd[op_idx])
+                op_idx += 1
+        nbrs = [*nbrs, *op_nbhd[op_idx:]]
+
+        return nbrs
 
 
