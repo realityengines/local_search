@@ -22,34 +22,26 @@ def algo_params(param_str):
         params.append({'algo_name':'random', 'total_queries':30})
         params.append({'algo_name':'evolution', 'total_queries':30})
 
-    elif param_str == 'random': 
-        params.append({'algo_name':'random', 'total_queries':10})
-
     elif param_str == 'local_search': 
-        params.append({'algo_name':'random', 'total_queries':150})
+        params.append({'algo_name':'random', 'total_queries':300})
 
     elif param_str == 'ls_cont_at_min':
-        params.append({'algo_name':'local_search', 'total_queries':150, 'stop_at_minimum':False})
+        params.append({'algo_name':'local_search', 'total_queries':300, 'stop_at_minimum':False})
 
     elif param_str == 'ls_query_part':
-        params.append({'algo_name':'local_search', 'total_queries':150, 'query_full_nbhd':False})
-
-    elif param_str == 'bananas':
-        params.append({'algo_name':'bananas', 'total_queries':150, 'verbose':0})
+        params.append({'algo_name':'local_search', 'total_queries':300, 'query_full_nbhd':False})
 
     elif param_str == 'main_experiments':
-        params.append({'algo_name':'random', 'total_queries':150})
-        params.append({'algo_name':'evolution', 'total_queries':150})
-        params.append({'algo_name':'bananas', 'total_queries':150})  
-        params.append({'algo_name':'gp_bayesopt', 'total_queries':150})        
-        params.append({'algo_name':'dngo', 'total_queries':150})
+        params.append({'algo_name':'random', 'total_queries':300})
+        params.append({'algo_name':'evolution', 'total_queries':300})
+        params.append({'algo_name':'bananas', 'total_queries':300})  
+        params.append({'algo_name':'gp_bayesopt', 'total_queries':300})        
+        params.append({'algo_name':'dngo', 'total_queries':300})
+        params.append({'algo_name':'local_search', 'total_queries':300, 'stop_at_minimum':False})
+        params.append({'algo_name':'local_search', 'total_queries':300, 'query_full_nbhd':False})
 
-    elif param_str == 'ablation':
-        params.append({'algo_name':'bananas', 'total_queries':150})   
-        params.append({'algo_name':'bananas', 'total_queries':150, 'encoding_type':'adjacency'})
-        params.append({'algo_name':'gp_bayesopt', 'total_queries':150, 'distance':'path_distance'})
-        params.append({'algo_name':'gp_bayesopt', 'total_queries':150, 'distance':'edit_distance'})
-        params.append({'algo_name':'bananas', 'total_queries':150, 'acq_opt_type':'random'})
+    elif param_str == 'bananas':
+        params.append({'algo_name':'bananas', 'total_queries':150})
 
     else:
         print('invalid algorithm params: {}'.format(param_str))
