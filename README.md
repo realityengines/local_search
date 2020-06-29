@@ -7,9 +7,10 @@ _arXiv:2005.02960_.
 We study the simplest versions of local search, showing that local search achieves state-of-the-art results on NASBench-101 (size 10^6) and NASBench-201 (size 10^4). We also show that local search fails on the DARTS search space (size 10^18). This suggests that existing NAS benchmarks may be too small to adequately evaluate NAS algorithms. See our paper for a theoretical study which characterizes the performance of local search on graph optimization problems, backed by simulation results.
 
 <p align="center">
-  <img src="img/structured.png" alt="structured" width="35%">
-  <img src="img/unstructured.png" alt="unstructured" width="35%">
+  <img src="img/cifar_viz_cropped.png" alt="structured" width="35%">
+  <img src="img/random_viz_cropped.png" alt="unstructured" width="35%">
 </p>
+In the left figure, each point is an architecture from NAS-Bench-201 trained on CIFAR10, and each edge denotes an iteration of local search. The right figure is similar, but the architectures are assigned validation losses at random. We see that local search is much more likely to converge to an architecture with low loss on structured data (CIFAR10) rather than unstructured (random) data.
 
 ## Requirements
 This repo is our fork of [naszilla/bananas](https://github.com/naszilla/bananas/). The requirements are as follows.
