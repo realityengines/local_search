@@ -10,7 +10,7 @@ We study the simplest versions of local search, showing that local search achiev
   <img src="img/cifar_viz_cropped.png" alt="structured" width="35%">
   <img src="img/random_viz_cropped.png" alt="unstructured" width="35%">
 </p>
-In the left figure, each point is an architecture from NAS-Bench-201 trained on CIFAR10, and each edge denotes an iteration of local search. The right figure is similar, but the architectures are assigned validation losses at random. We see that local search is much more likely to converge to an architecture with low loss on structured data (CIFAR10) rather than unstructured (random) data.
+In the left figure, each point is an architecture from NAS-Bench-201 trained on CIFAR10, and each edge denotes the LS function. We plotted the trees of the nine architectures with the highest accuracies. The right figure is similar, but the architectures are assigned validation losses at random. We see that we are much more likely to converge to an architecture with low loss on structured data (CIFAR10) rather than unstructured (random) data.
 
 ## Requirements
 This repo is our fork of [naszilla/bananas](https://github.com/naszilla/bananas/). The requirements are as follows.
