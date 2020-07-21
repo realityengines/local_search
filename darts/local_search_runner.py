@@ -7,7 +7,8 @@ import pickle
 import numpy as np
 import copy
 
-sys.path.append(os.path.expanduser('~/naszilla'))
+sys.path.append(os.path.expanduser('~/local_search'))
+os.environ['search_space'] = 'darts'
 from data import Data
 
 
