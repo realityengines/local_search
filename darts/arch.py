@@ -182,7 +182,7 @@ class Arch:
         # by comparing their path encodings
         return np.sum(np.array(self.encode_paths() != np.array(other.encode_paths())))
 
-    def get_neighborhood(self, nbhd_type='full', shuffle=True):
+    def get_neighborhood(self, shuffle=True):
         op_nbhd = []
         edge_nbhd = []
 

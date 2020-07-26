@@ -218,19 +218,10 @@ class Cell:
 
         return ops_dist + self.edit_distance(other)
 
-    def get_neighborhood(self, nasbench, nbhd_type='full', shuffle=True):
+    def get_neighborhood(self, nasbench, shuffle=True):
         nbhd = []
         ops = self.get_op_list()
-        start, end = 0, len(ops)
-        if nbhd_type == 'node1':
-            end = 1
-        elif nbhd_type == 'node2':
-            start = 1
-            end = 3
-        elif nbhd_type == 'node3':
-            start = 3
-
-        for i in range(start, end):
+        for i in range(len(ops)):
             available = [op for op in OPS if op != ops[i]]
             for op in available:
                 new_ops = ops.copy()

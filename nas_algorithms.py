@@ -60,6 +60,84 @@ def compute_best_test_losses(data, k, total_queries, loss):
     return results
 
 
+def local_search(search_space,
+                 num_init=10,
+                 k=10,
+                 loss='val_loss',
+                 query_full_nbhd=True,
+                 stop_at_minimum=True,
+                 total_queries=500,
+                 deterministic=True,
+                 verbose=1):
+    """
+    local search
+    """
+    query_dict = {}
+    iter_dict = {}
+    data = []
+    query = 0
+
+    while True:
+        # loop over full runs of local search until we hit total_queries
+        
+        arch_dicts = []
+        while len(arch_dicts) < num_init:
+            arch_dict = search_space.query_arch(deterministic=deterministic)
+
+            if search_space.get_hash(arch_dict['spec']) not in query_dict:
+                query_dict[search_space.get_hash(arch_dict['spec'])] = 1
+                data.append(arch_dict)
+                arch_dicts.append(arch_dict)
+                query += 1
+                if query >= total_queries:
+                    return data
+
+        sorted_arches = sorted([(arch, arch[loss]) for arch in arch_dicts], key=lambda i:i[1])
+        arch_dict = sorted_arches[0][0]                
+
+        while True:
+            # loop over iterations of local search until we hit a local minimum
+            if verbose:
+                print('starting iteration, query', query)
+            iter_dict[search_space.get_hash(arch_dict['spec'])] = 1
+            nbhd = search_space.get_nbhd(arch_dict['spec'])
+            improvement = False
+            nbhd_dicts = []
+            for nbr in nbhd:
+                if search_space.get_hash(nbr) not in query_dict:
+                    query_dict[search_space.get_hash(nbr)] = 1
+                    nbr_dict = search_space.query_arch(nbr, deterministic=deterministic)
+                    data.append(nbr_dict)
+                    nbhd_dicts.append(nbr_dict)
+                    query += 1
+                    if query >= total_queries:
+                        return data
+                    if nbr_dict[loss] < arch_dict[loss]:
+                        improvement = True
+                        if not query_full_nbhd:
+                            arch_dict = nbr_dict
+                            break
+
+            if not stop_at_minimum:
+                sorted_data = sorted([(arch, arch[loss]) for arch in data], key=lambda i:i[1])
+                index = 0
+                while search_space.get_hash(sorted_data[index][0]['spec']) in iter_dict:
+                    index += 1
+
+                arch_dict = sorted_data[index][0]
+
+            elif not improvement:
+                break
+
+            else:
+                sorted_nbhd = sorted([(nbr, nbr[loss]) for nbr in nbhd_dicts], key=lambda i:i[1])
+                arch_dict = sorted_nbhd[0][0]
+
+        if verbose:
+            top_5_loss = sorted([d[loss] for d in data])[:min(5, len(data))]
+            print('local_search, query {}, top 5 losses {}'.format(query, top_5_loss))
+
+
 def random_search(search_space,
                   total_queries=150, 
                   loss='val_loss',
@@ -352,97 +430,3 @@ def dngo_search(search_space,
         query += k
 
     return data
-
-
-def local_search(search_space,
-                 num_init=10,
-                 k=10,
-                 loss='val_loss',
-                 nbhd_type_pattern=['full'],
-                 query_full_nbhd=True,
-                 stop_at_minimum=True,
-                 total_queries=500,
-                 deterministic=True,
-                 verbose=1):
-    """
-    local search
-    """
-
-    query_dict = {}
-    iter_dict = {}
-    data = []
-    query = 0
-
-    while True:
-        # loop over full runs of local search until we hit total_queries
-        
-        arch_dicts = []
-        while len(arch_dicts) < num_init:
-            arch_dict = search_space.query_arch(deterministic=deterministic)
-
-            if search_space.get_hash(arch_dict['spec']) not in query_dict:
-                query_dict[search_space.get_hash(arch_dict['spec'])] = 1
-                data.append(arch_dict)
-                arch_dicts.append(arch_dict)
-                query += 1
-                if query >= total_queries:
-                    return data
-
-        sorted_arches = sorted([(arch, arch[loss]) for arch in arch_dicts], key=lambda i:i[1])
-        arch_dict = sorted_arches[0][0]                
-        nbhd_type_num = -1
-
-        while True:
-            # loop over iterations of local search until we hit a local minimum
-            if verbose:
-                print('starting iteration, query', query)
-            nbhd_type_num = (nbhd_type_num + 1) % len(nbhd_type_pattern)
-            iter_dict[search_space.get_hash(arch_dict['spec'])] = 1
-            nbhd = search_space.get_nbhd(arch_dict['spec'], 
-                                        nbhd_type=nbhd_type_pattern[nbhd_type_num])
-            improvement = False
-            nbhd_dicts = []
-            for nbr in nbhd:
-                if search_space.get_hash(nbr) not in query_dict:
-                    query_dict[search_space.get_hash(nbr)] = 1
-                    nbr_dict = search_space.query_arch(nbr, deterministic=deterministic)
-                    data.append(nbr_dict)
-                    nbhd_dicts.append(nbr_dict)
-                    query += 1
-                    if query >= total_queries:
-                        return data
-                    if nbr_dict[loss] < arch_dict[loss]:
-                        improvement = True
-                        if not query_full_nbhd:
-                            arch_dict = nbr_dict
-                            break
-
-            if not stop_at_minimum:
-                sorted_data = sorted([(arch, arch[loss]) for arch in data], key=lambda i:i[1])
-                index = 0
-                while search_space.get_hash(sorted_data[index][0]['spec']) in iter_dict:
-                    index += 1
-
-                arch_dict = sorted_data[index][0]
-
-            elif not improvement:
-                break
-
-            else:
-                sorted_nbhd = sorted([(nbr, nbr[loss]) for nbr in nbhd_dicts], key=lambda i:i[1])
-                arch_dict = sorted_nbhd[0][0]
-
-            # todo check for repeats. remove this later if it's working consistently
-            dic = {}
-            count = 0
-            for d in data:
-                if search_space.get_hash(d['spec']) not in dic:
-                    dic[search_space.get_hash(d['spec'])] = 1
-                else:
-                    count += 1
-            if count:
-                print('there were {} repeats'.format(count))
-
-        if verbose:
-            top_5_loss = sorted([d[loss] for d in data])[:min(5, len(data))]
-            print('local_search, query {}, top 5 losses {}'.format(query, top_5_loss))

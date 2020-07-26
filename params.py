@@ -11,7 +11,16 @@ def algo_params(param_str):
     """
     params = []
 
-    if param_str == 'test':
+    if param_str == 'local_search': 
+        params.append({'algo_name':'local_search', 'total_queries':300})
+
+    elif param_str == 'ls_cont_at_min':
+        params.append({'algo_name':'local_search', 'total_queries':300, 'stop_at_minimum':False})
+
+    elif param_str == 'ls_query_part':
+        params.append({'algo_name':'local_search', 'total_queries':300, 'query_full_nbhd':False})
+
+    elif param_str == 'test':
         params.append({'algo_name':'random', 'total_queries':30})
         params.append({'algo_name':'evolution', 'total_queries':30})
         params.append({'algo_name':'bananas', 'total_queries':30})   
@@ -21,15 +30,6 @@ def algo_params(param_str):
     elif param_str == 'test_simple': 
         params.append({'algo_name':'random', 'total_queries':30})
         params.append({'algo_name':'evolution', 'total_queries':30})
-
-    elif param_str == 'local_search': 
-        params.append({'algo_name':'random', 'total_queries':300})
-
-    elif param_str == 'ls_cont_at_min':
-        params.append({'algo_name':'local_search', 'total_queries':300, 'stop_at_minimum':False})
-
-    elif param_str == 'ls_query_part':
-        params.append({'algo_name':'local_search', 'total_queries':300, 'query_full_nbhd':False})
 
     elif param_str == 'main_experiments':
         params.append({'algo_name':'random', 'total_queries':300})

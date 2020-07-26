@@ -24,7 +24,7 @@ class Data:
     def __init__(self, 
                  search_space, 
                  dataset='cifar10', 
-                 nasbench_folder='./', 
+                 nasbench_folder='../naszilla/', 
                  loaded_nasbench=None):
         self.search_space = search_space
         self.dataset = dataset
@@ -309,8 +309,8 @@ class Data:
                     sys.exit()
         return matrix
 
-    def get_nbhd(self, arch, nbhd_type='full'):
+    def get_nbhd(self, arch):
         if self.search_space in ['nasbench', 'nasbench_201']:
-            return Cell(**arch).get_neighborhood(self.nasbench, nbhd_type=nbhd_type)
+            return Cell(**arch).get_neighborhood(self.nasbench)
         else:
-            return Arch(arch).get_neighborhood(nbhd_type=nbhd_type)
+            return Arch(arch).get_neighborhood()

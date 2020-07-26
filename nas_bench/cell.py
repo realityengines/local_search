@@ -308,38 +308,36 @@ class Cell:
         edges, nodes = self.get_utilized()
         return (edge in edges)
 
-    def get_neighborhood(self, nasbench, nbhd_type='op', shuffle=True):
+    def get_neighborhood(self, nasbench, shuffle=True):
         nbhd = []
-        if nbhd_type in ['op', 'full']:
-            for vertex in range(1, OP_SPOTS + 1):
-                if self.is_valid_vertex(vertex):
-                    available = [op for op in OPS if op != self.ops[vertex]]
-                    for op in available:
-                        new_matrix = copy.deepcopy(self.matrix)
-                        new_ops = copy.deepcopy(self.ops)
-                        new_ops[vertex] = op
-                        new_arch = {'matrix':new_matrix, 'ops':new_ops}
-                        nbhd.append(new_arch)
-
-        if nbhd_type != 'op':
-            for src in range(0, NUM_VERTICES - 1):
-                for dst in range(src+1, NUM_VERTICES):
+        # add the cells that differ by one op
+        for vertex in range(1, OP_SPOTS + 1):
+            if self.is_valid_vertex(vertex):
+                available = [op for op in OPS if op != self.ops[vertex]]
+                for op in available:
                     new_matrix = copy.deepcopy(self.matrix)
                     new_ops = copy.deepcopy(self.ops)
-                    new_matrix[src][dst] = 1 - new_matrix[src][dst]
+                    new_ops[vertex] = op
                     new_arch = {'matrix':new_matrix, 'ops':new_ops}
-                
-                    if self.matrix[src][dst] and nbhd_type != 'add_edge' \
-                    and self.is_valid_edge((src, dst)):
-                        spec = api.ModelSpec(matrix=new_matrix, ops=new_ops)
-                        if nasbench.is_valid(spec):                            
-                            nbhd.append(new_arch)  
+                    nbhd.append(new_arch)
 
-                    if not self.matrix[src][dst] and nbhd_type != 'sub_edge' \
-                    and Cell(**new_arch).is_valid_edge((src, dst)):
-                        spec = api.ModelSpec(matrix=new_matrix, ops=new_ops)
-                        if nasbench.is_valid(spec):                            
-                            nbhd.append(new_arch)                          
+        # add the cells that differ by one edge
+        for src in range(0, NUM_VERTICES - 1):
+            for dst in range(src+1, NUM_VERTICES):
+                new_matrix = copy.deepcopy(self.matrix)
+                new_ops = copy.deepcopy(self.ops)
+                new_matrix[src][dst] = 1 - new_matrix[src][dst]
+                new_arch = {'matrix':new_matrix, 'ops':new_ops}
+            
+                if self.matrix[src][dst] and self.is_valid_edge((src, dst)):
+                    spec = api.ModelSpec(matrix=new_matrix, ops=new_ops)
+                    if nasbench.is_valid(spec):                            
+                        nbhd.append(new_arch)  
+
+                if not self.matrix[src][dst] and Cell(**new_arch).is_valid_edge((src, dst)):
+                    spec = api.ModelSpec(matrix=new_matrix, ops=new_ops)
+                    if nasbench.is_valid(spec):                            
+                        nbhd.append(new_arch)                          
   
         if shuffle:
             random.shuffle(nbhd)
