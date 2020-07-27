@@ -24,7 +24,7 @@ class Data:
     def __init__(self, 
                  search_space, 
                  dataset='cifar10', 
-                 nasbench_folder='../naszilla/', 
+                 nasbench_folder='./', 
                  loaded_nasbench=None):
         self.search_space = search_space
         self.dataset = dataset
