@@ -1,5 +1,7 @@
 # Local Search for NAS
 
+**Note: this repository has been combined with other NAS projects into [naszilla/naszilla](https://github.com/naszilla/naszilla), and this repo is deprecated and not maintained. Please use [naszilla/naszilla](https://github.com/naszilla/naszilla), which has more functionality.**
+
 [Local Search is State of the Art for Neural Architecture Search Benchmarks](https://arxiv.org/abs/2005.02960)\
 Colin White, Sam Nolen, and Yash Savani.\
 _arXiv:2005.02960_.
